@@ -2089,6 +2089,22 @@ transition: none;
     }
 }
 
+/* Shared Oxford backdrop across the site sections */
+body {
+    background:
+        linear-gradient(rgba(18, 12, 28, 0.68), rgba(18, 12, 28, 0.68)),
+        url("oxford.jpg") center / cover fixed;
+}
+
+.benefits,
+.scholarship-section,
+.preparation-section,
+.university-showcase,
+.auth-section,
+.account-section {
+    background: rgba(25, 18, 40, 0.82);
+}
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -2099,8 +2115,8 @@ body {
     min-height: 100vh;
     background:
         linear-gradient(
-            rgba(25, 18, 40, 0.35),
-            rgba(25, 18, 40, 0.55)
+            rgba(16, 10, 26, 0.78),
+            rgba(16, 10, 26, 0.86)
         ),
         url("oxford.jpg");
 
@@ -2112,4 +2128,20 @@ body {
     color: white;
     padding: 40px;
     box-sizing: border-box;
+}
+
+.homepage .hero-content h1 {
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.homepage .hero-description,
+.homepage .hero-stats span {
+    color: #f2ebfa;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+}
+
+.homepage .hero-stats strong {
+    color: #fff;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
