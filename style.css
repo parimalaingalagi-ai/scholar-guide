@@ -2013,7 +2013,66 @@ transition: none;
     overflow-wrap: anywhere;
     margin: 0;
 }
+/* Graduation image on the homepage */
+.hero-visual {
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 24px;
+}
 
+.hero-visual img {
+    display: block;
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    border-radius: 24px;
+}
+
+.hero-image-caption {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    color: #fff;
+    background: rgba(20, 30, 60, 0.82);
+    border-radius: 16px;
+}
+
+.hero-image-caption p,
+.hero-image-caption h2 {
+    margin: 0;
+}
+
+.hero-image-caption h2 {
+    font-size: 18px;
+}
+
+.hero-icon {
+    font-size: 32px;
+}
+
+#protected-content[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 768px) {
+    .hero-visual img {
+        height: 300px;
+    }
+
+    .hero-image-caption {
+        right: 10px;
+        bottom: 10px;
+        left: 10px;
+    }
+}
 .footer-copyright {
     color: var(--muted);
     font-size: 13px;
@@ -2028,4 +2087,29 @@ transition: none;
     .footer-author-label {
         letter-spacing: 2px;
     }
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: #f5efff;
+}
+
+.homepage {
+    min-height: 100vh;
+    background:
+        linear-gradient(
+            rgba(25, 18, 40, 0.35),
+            rgba(25, 18, 40, 0.55)
+        ),
+        url("oxford.jpg");
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+
+    color: white;
+    padding: 40px;
+    box-sizing: border-box;
 }

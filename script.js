@@ -1263,7 +1263,7 @@ onAuthStateChanged(auth, (user) => {
 
     authSection.hidden = isLoggedIn;
     accountSection.hidden = !isLoggedIn;
-    protectedContent.hidden = !isLoggedIn;
+    protectedContent.hidden = !exploreMode;
 
     if (isLoggedIn) {
         signedInEmail.textContent = user.email || "Signed-in user";
@@ -1280,3 +1280,32 @@ onAuthStateChanged(auth, (user) => {
         updateAuthForm();
     }
 });
+let exploreMode = false;
+
+function revealExploreContent(event) {
+    event.preventDefault();
+
+    exploreMode = true;
+
+    const protectedContent =
+        document.getElementById("protected-content");
+
+    if (protectedContent) {
+        protectedContent.hidden = false;
+    }
+
+    document.getElementById("exploreButton")
+        ?.setAttribute("aria-expanded", "true");
+
+    document.getElementById("heroExploreButton")
+        ?.setAttribute("aria-expanded", "true");
+
+    document.getElementById("universities")
+        ?.scrollIntoView({ behavior: "smooth" });
+}
+
+document.getElementById("exploreButton")
+    ?.addEventListener("click", revealExploreContent);
+
+document.getElementById("heroExploreButton")
+    ?.addEventListener("click", revealExploreContent);
