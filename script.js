@@ -536,6 +536,7 @@ function renderScholarships() {
 
             writeStorage("scholarGuideSaved", savedScholarships);
             updateSaveButton();
+            window.dispatchEvent(new Event("scholarGuideSavedChanged"));
         });
 
         const detailsButton = document.createElement("button");
@@ -1263,7 +1264,9 @@ onAuthStateChanged(auth, (user) => {
 
     authSection.hidden = isLoggedIn;
     accountSection.hidden = !isLoggedIn;
-    protectedContent.hidden = !exploreMode;
+    protectedContent.hidden = !isLoggedIn || !exploreMode;
+    document.getElementById("dashboard").hidden =
+        !isLoggedIn || !exploreMode;
 
     if (isLoggedIn) {
         signedInEmail.textContent = user.email || "Signed-in user";
@@ -1294,6 +1297,8 @@ function revealExploreContent(event) {
         protectedContent.hidden = false;
     }
 
+    document.getElementById("dashboard").hidden = false;
+
     document.getElementById("exploreButton")
         ?.setAttribute("aria-expanded", "true");
 
@@ -1309,3 +1314,1121 @@ document.getElementById("exploreButton")
 
 document.getElementById("heroExploreButton")
     ?.addEventListener("click", revealExploreContent);
+
+(() => {
+  "use strict";
+
+  const STORAGE_KEY = "scholarGuideDashboardV1";
+  const CUSTOM_STORAGE_KEY = "scholarGuideCustomScholarshipsV1";
+
+  const validStatuses = [
+    "Interested",
+    "Applying",
+    "Submitted",
+    "Accepted",
+    "Rejected"
+  ];
+  let dashboardStatuses = {};
+  let selectedId = null;
+  let customScholarships = readStorage(CUSTOM_STORAGE_KEY, []);
+  if (!Array.isArray(customScholarships)) customScholarships = [];
+
+  const $ = id => document.getElementById(id);
+
+  function loadStatuses() {
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(STORAGE_KEY) || "{}"
+      );
+
+      dashboardStatuses = Object.fromEntries(
+        Object.entries(saved).filter(([, status]) =>
+          validStatuses.includes(status)
+        )
+      );
+    } catch (error) {
+      console.warn("Dashboard status data could not be loaded.");
+    }
+  }
+
+  function saveStatuses() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(dashboardStatuses));
+      return true;
+    } catch (error) {
+      alert("Unable to save. Check your browser storage settings.");
+      return false;
+    }
+  }
+
+  function getDashboardScholarships() {
+    return [
+      ...scholarships.filter(item =>
+        savedScholarships.includes(item.id)
+      ),
+      ...customScholarships
+    ].map(item => ({
+      ...item,
+      status: dashboardStatuses[item.id] || "Interested"
+    }));
+  }
+
+  function saveCustomScholarships() {
+    try {
+      localStorage.setItem(
+        CUSTOM_STORAGE_KEY,
+        JSON.stringify(customScholarships)
+      );
+      return true;
+    } catch (error) {
+      console.error("Custom scholarship could not be saved:", error);
+      window.alert("Unable to save this scholarship. Check your browser storage settings.");
+      return false;
+    }
+  }
+
+  function daysRemaining(value) {
+    if (!value) return null;
+
+    const date = new Date(
+      /^\d{4}-\d{2}-\d{2}$/.test(value)
+        ? value + "T00:00:00"
+        : value
+    );
+
+    if (Number.isNaN(date.getTime())) return null;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return Math.round((date - today) / 86400000);
+  }
+
+  function deadlineLabel(value) {
+    const days = daysRemaining(value);
+
+    if (days === null) return "Date not announced";
+    if (days < 0) return "Deadline passed";
+    if (days === 0) return "Deadline today";
+    if (days === 1) return "1 day remaining";
+
+    return days + " days remaining";
+  }
+
+  function makeElement(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+
+    return element;
+  }
+
+  function renderCounters() {
+    const items = getDashboardScholarships();
+    $("savedCount").textContent = items.length;
+
+    $("progressCount").textContent =
+      items.filter(item =>
+        item.status === "Applying"
+      ).length;
+
+    $("submittedCount").textContent =
+      items.filter(item =>
+        item.status === "Submitted"
+      ).length;
+
+    $("deadlineCount").textContent =
+      items.filter(item => {
+        const days = daysRemaining(item.deadline);
+        return days !== null && days >= 0 && days <= 30;
+      }).length;
+  }
+
+  function renderDetails() {
+    const panel = $("selectedScholarship");
+    panel.replaceChildren();
+
+    const item = getDashboardScholarships().find(
+      scholarship => scholarship.id === selectedId
+    );
+
+    if (!item) {
+      panel.textContent =
+        "Save a scholarship from the Scholarships directory to view its details here.";
+      return;
+    }
+
+    panel.appendChild(makeElement("h3", "", item.name));
+
+    const fields = [
+      ["Country", item.country],
+      ["Degree level", item.degree],
+      ["Subject", item.subject],
+      ["Funding", item.funding],
+      ["Tuition", item.tuition],
+      ["Stipend", item.stipend],
+      ["Benefits", item.benefits],
+      ["Eligibility", item.eligibility],
+      ["Official deadline", item.deadline],
+      ["Deadline status", deadlineLabel(item.deadline)],
+      ["Description", item.description]
+    ];
+
+    fields.forEach(([label, value]) => {
+      const block = makeElement("div", "detail-date");
+      block.appendChild(makeElement("strong", "", label));
+      block.appendChild(
+        makeElement("p", "", value || "Check the official provider")
+      );
+      panel.appendChild(block);
+    });
+
+    const label = makeElement("label", "", "Application status");
+    label.htmlFor = "dashboardStatus";
+
+    const select = document.createElement("select");
+    select.id = "dashboardStatus";
+
+    ["Interested", "Applying", "Submitted", "Accepted", "Rejected"]
+      .forEach(status => {
+        const option = document.createElement("option");
+        option.value = status;
+        option.textContent = status;
+        option.selected = status === item.status;
+        select.appendChild(option);
+      });
+
+    const saveButton = makeElement("button", "detail-action", "Save Status");
+    saveButton.type = "button";
+
+    saveButton.addEventListener("click", () => {
+      dashboardStatuses[item.id] = select.value;
+
+      if (saveStatuses()) renderDashboard();
+    });
+
+    panel.append(label, select, saveButton);
+
+    if (item.url && /^https:\/\/[^\s]+$/i.test(item.url)) {
+      const link = makeElement("a", "detail-action", "Open Official Website");
+      link.href = item.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      panel.appendChild(link);
+    }
+  }
+
+  function renderDashboard() {
+    const list = $("dashboardScholarships");
+    const filter = $("statusFilter");
+    const items = getDashboardScholarships();
+
+    if (!list || !filter ||
+        !$("savedCount") || !$("progressCount") ||
+        !$("submittedCount") || !$("deadlineCount") ||
+        !$("selectedScholarship")) {
+      return;
+    }
+
+    renderCounters();
+    list.replaceChildren();
+
+    const visible = items.filter(item =>
+      filter.value === "All" || item.status === filter.value
+    );
+
+    if (visible.length === 0) {
+      list.appendChild(
+        makeElement(
+          "p",
+          "empty-state",
+          items.length
+            ? "No scholarships match this status."
+            : "No saved scholarships yet. Save opportunities from the Scholarships directory to track them here."
+        )
+      );
+    }
+
+    visible.forEach(item => {
+      const row = makeElement(
+        "article",
+        "scholarship-row" + (item.id === selectedId ? " active" : "")
+      );
+
+      row.tabIndex = 0;
+      row.setAttribute("role", "button");
+      row.appendChild(makeElement("h3", "", item.name));
+      row.appendChild(makeElement("p", "", item.country + " · " + item.degree));
+      row.appendChild(makeElement("p", "", "Deadline: " + item.deadline));
+      row.appendChild(makeElement("span", "status-pill", item.status));
+
+      const choose = () => {
+        selectedId = item.id;
+        renderDashboard();
+      };
+
+      row.addEventListener("click", choose);
+
+      row.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          choose();
+        }
+      });
+
+      list.appendChild(row);
+    });
+
+    renderDetails();
+  }
+
+  function renderSearchResults() {
+    const search = $("dashboardScholarshipSearch");
+    const results = $("dashboardSearchResults");
+    if (!search || !results) return;
+
+    results.replaceChildren();
+    const query = search.value.trim().toLowerCase();
+
+    if (!query) {
+      results.appendChild(makeElement(
+        "p",
+        "feature-empty",
+        "Type a name, country, subject, degree, or funding type to search."
+      ));
+      return;
+    }
+
+    const matches = scholarships.filter(item => {
+      const searchable = [
+        item.name,
+        item.country,
+        item.subject,
+        item.degree,
+        item.funding,
+        item.keywords
+      ].join(" ").toLowerCase();
+      return searchable.includes(query);
+    });
+
+    if (!matches.length) {
+      results.appendChild(makeElement(
+        "p",
+        "feature-empty",
+        "No directory matches. Use “Add a scholarship not listed above” to track it."
+      ));
+      return;
+    }
+
+    matches.forEach(item => {
+      const entry = makeElement("div", "feature-list-item");
+      entry.append(
+        makeElement("strong", "", item.name),
+        makeElement(
+          "p",
+          "",
+          `${item.country} · ${item.degree} · ${item.funding}`
+        ),
+        makeElement("p", "", `Official deadline: ${item.deadline}`)
+      );
+
+      const isSaved = savedScholarships.includes(item.id);
+      const addButton = makeElement(
+        "button",
+        "detail-action",
+        isSaved ? "Already in My Scholarships" : "Add to My Scholarships"
+      );
+      addButton.type = "button";
+      addButton.disabled = isSaved;
+      addButton.addEventListener("click", () => {
+        if (savedScholarships.includes(item.id)) return;
+
+        const updated = [...savedScholarships, item.id];
+        if (!writeStorage("scholarGuideSaved", updated)) {
+          window.alert("Unable to save this scholarship. Check your browser storage settings.");
+          return;
+        }
+
+        savedScholarships = updated;
+        selectedId = item.id;
+        window.dispatchEvent(new Event("scholarGuideSavedChanged"));
+        renderSearchResults();
+      });
+      entry.appendChild(addButton);
+      results.appendChild(entry);
+    });
+  }
+
+  function addCustomScholarship(event) {
+    event.preventDefault();
+
+    const form = $("customScholarshipForm");
+    const name = $("customScholarshipName").value.trim();
+    const deadline = $("customScholarshipDeadline").value.trim();
+    const urlInput = $("customScholarshipUrl").value.trim();
+    const status = $("customScholarshipStatus");
+
+    if (!name) {
+      status.textContent = "Enter the scholarship name.";
+      return;
+    }
+
+    let url = "";
+    if (urlInput) {
+      try {
+        const parsedUrl = new URL(urlInput);
+        if (parsedUrl.protocol !== "https:") {
+          status.textContent = "Use the provider’s secure HTTPS website.";
+          return;
+        }
+        url = parsedUrl.href;
+      } catch (error) {
+        status.textContent = "Enter a valid official website address.";
+        return;
+      }
+    }
+
+    const item = {
+      id: `custom-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
+      name,
+      country: "Not specified",
+      degree: "Not specified",
+      subject: "Not specified",
+      funding: "Check official provider",
+      tuition: "Check official provider",
+      stipend: "Check official provider",
+      benefits: "Check official provider",
+      description: "Custom scholarship added by you.",
+      eligibility: "Check the official provider.",
+      deadline: deadline || "Check the official provider",
+      url,
+      keywords: ""
+    };
+
+    customScholarships.push(item);
+    if (!saveCustomScholarships()) {
+      customScholarships.pop();
+      return;
+    }
+
+    selectedId = item.id;
+    dashboardStatuses[item.id] = "Interested";
+    saveStatuses();
+    form.reset();
+    status.textContent = "Scholarship added to My Scholarships.";
+    renderDashboard();
+  }
+
+  function init() {
+    if (!$("dashboardScholarships") || !$("statusFilter")) return;
+
+    loadStatuses();
+    selectedId = getDashboardScholarships()[0]?.id || null;
+
+    $("statusFilter").addEventListener("change", renderDashboard);
+    $("refreshDashboardButton")?.addEventListener("click", renderDashboard);
+    $("dashboardScholarshipSearch")
+      ?.addEventListener("input", renderSearchResults);
+    $("customScholarshipForm")
+      ?.addEventListener("submit", addCustomScholarship);
+    window.addEventListener("scholarGuideSavedChanged", () => {
+      const items = getDashboardScholarships();
+      if (!items.some(item => item.id === selectedId)) {
+        selectedId = items[0]?.id || null;
+      }
+      renderDashboard();
+    });
+
+    renderSearchResults();
+    renderDashboard();
+  }
+
+  // Prevent duplicate initialization if this module is accidentally included twice.
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+})();
+
+
+/* ==========================================
+   SCHOLAR GUIDE — FEATURE UPGRADE
+   Adds student tools to the existing website
+========================================== */
+
+const featureStorageKey = "scholarGuideFeatureData";
+
+function getFeatureData() {
+    return readStorage(featureStorageKey, {
+        applications: {},
+        profile: {},
+        comparedUniversities: []
+    });
+}
+
+function saveFeatureData(data) {
+    return writeStorage(featureStorageKey, data);
+}
+
+function featureElement(tag, className, text) {
+    const element = document.createElement(tag);
+    if (className) element.className = className;
+    if (text !== undefined) element.textContent = text;
+    return element;
+}
+
+function makeFeatureButton(label, action) {
+    const button = featureElement("button", "", label);
+    button.type = "button";
+    button.addEventListener("click", action);
+    return button;
+}
+
+function makeFieldLabel(labelText, control) {
+    const wrapper = document.createElement("div");
+    const label = featureElement("label", "", labelText);
+    label.htmlFor = control.id;
+    wrapper.append(label, control);
+    return wrapper;
+}
+
+function makeSelect(id, options) {
+    const select = document.createElement("select");
+    select.id = id;
+
+    options.forEach(({ value, label }) => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+    });
+
+    return select;
+}
+
+function makeInput(id, type, placeholder = "") {
+    const input = document.createElement("input");
+    input.id = id;
+    input.type = type;
+    input.placeholder = placeholder;
+    return input;
+}
+
+function makeTextArea(id, placeholder) {
+    const textarea = document.createElement("textarea");
+    textarea.id = id;
+    textarea.placeholder = placeholder;
+    return textarea;
+}
+
+function makeFeatureCard(title, description) {
+    const card = featureElement("section", "feature-card");
+    card.append(
+        featureElement("h3", "", title),
+        featureElement("p", "", description)
+    );
+    return card;
+}
+
+/* Build the feature area without replacing existing sections. */
+
+const featureHub = featureElement("section", "feature-hub");
+featureHub.id = "student-tools";
+featureHub.append(
+    featureElement("p", "eyebrow", "YOUR PERSONAL WORKSPACE"),
+    featureElement("h2", "", "Your Student Dashboard"),
+    featureElement(
+        "p",
+        "feature-intro",
+        "Find opportunities, plan applications, and keep track of your next steps."
+    )
+);
+
+const featureGrid = featureElement("div", "feature-grid");
+featureHub.appendChild(featureGrid);
+
+const profileCard = makeFeatureCard(
+    "🎯 Scholarship Match Finder",
+    "Choose your study preferences to find scholarships that may fit. Always check the official eligibility rules."
+);
+
+const matchLevel = makeSelect("matchLevel", [
+    { value: "", label: "Any study level" },
+    { value: "Bachelor's", label: "Bachelor's" },
+    { value: "Master's", label: "Master's" },
+    { value: "PhD", label: "PhD" },
+    { value: "Exchange", label: "Exchange" }
+]);
+
+const matchCountry = makeSelect("matchCountry", [
+    { value: "", label: "Any destination" },
+    ...[...new Set(scholarships.map(item => item.country))]
+        .sort()
+        .map(country => ({ value: country, label: country }))
+]);
+
+const matchSubject = makeSelect("matchSubject", [
+    { value: "", label: "Any subject" },
+    ...[...new Set(scholarships.map(item => item.subject))]
+        .sort()
+        .map(subject => ({ value: subject, label: subject }))
+]);
+
+const matchFunding = makeSelect("matchFunding", [
+    { value: "", label: "Any funding type" },
+    { value: "Fully funded", label: "Fully funded" },
+    { value: "Partially funded", label: "Partially funded" },
+    { value: "Tuition support", label: "Tuition support" },
+    { value: "Varies by award", label: "Varies by award" }
+]);
+
+const matchResults = featureElement("div", "feature-result");
+matchResults.id = "matchResults";
+
+profileCard.append(
+    makeFieldLabel("Preferred study level", matchLevel),
+    makeFieldLabel("Preferred destination", matchCountry),
+    makeFieldLabel("Subject area", matchSubject),
+    makeFieldLabel("Funding preference", matchFunding),
+    makeFeatureButton("Find My Matches", renderMatches),
+    matchResults
+);
+
+function renderMatches() {
+    matchResults.replaceChildren();
+
+    const matches = scholarships.filter(item =>
+        (!matchLevel.value ||
+            item.degree === matchLevel.value ||
+            item.degree === "Multiple levels") &&
+        (!matchCountry.value || item.country === matchCountry.value) &&
+        (!matchSubject.value ||
+            item.subject === matchSubject.value ||
+            item.subject === "Varies by programme") &&
+        (!matchFunding.value ||
+            item.funding === matchFunding.value)
+    );
+
+    if (!matches.length) {
+        matchResults.appendChild(featureElement(
+            "p",
+            "feature-empty",
+            "No matches found. Try changing one or more preferences."
+        ));
+        return;
+    }
+
+    matchResults.appendChild(featureElement(
+        "p",
+        "",
+        `${matches.length} possible match${matches.length === 1 ? "" : "es"} found.`
+    ));
+
+    matches.forEach(item => {
+        const result = featureElement("div", "feature-list-item");
+        result.append(
+            featureElement("strong", "", item.name),
+            featureElement(
+                "p",
+                "",
+                `${item.country} · ${item.degree} · ${item.funding}`
+            ),
+            featureElement("p", "", item.eligibility)
+        );
+
+        result.appendChild(makeFeatureButton("View Details", () => {
+            openScholarshipDetails(item.id);
+        }));
+
+        matchResults.appendChild(result);
+    });
+}
+
+/* Saved scholarship collection */
+
+const savedCard = makeFeatureCard(
+    "🔖 Saved Scholarships",
+    "Your saved opportunities from the scholarship directory appear here."
+);
+
+const savedList = featureElement("div", "feature-list");
+savedList.id = "featureSavedList";
+savedCard.appendChild(savedList);
+
+function renderSavedScholarships() {
+    savedList.replaceChildren();
+
+    const saved = scholarships.filter(item =>
+        savedScholarships.includes(item.id)
+    );
+
+    if (!saved.length) {
+        savedList.appendChild(featureElement(
+            "p",
+            "feature-empty",
+            "No saved scholarships yet. Use the Save button on a scholarship card."
+        ));
+        return;
+    }
+
+    saved.forEach(item => {
+        const entry = featureElement("div", "feature-list-item");
+        entry.append(
+            featureElement("strong", "", item.name),
+            featureElement(
+                "p",
+                "",
+                `${item.country} · ${item.degree} · ${item.funding}`
+            )
+        );
+
+        entry.append(
+            makeFeatureButton("View Details", () => {
+                openScholarshipDetails(item.id);
+            }),
+            makeFeatureButton("Remove", () => {
+                savedScholarships = savedScholarships.filter(
+                    id => id !== item.id
+                );
+                writeStorage("scholarGuideSaved", savedScholarships);
+                renderSavedScholarships();
+                renderScholarships();
+            })
+        );
+
+        savedList.appendChild(entry);
+    });
+}
+
+/* Application tracker */
+
+const trackerCard = makeFeatureCard(
+    "📅 Application Tracker",
+    "Track your progress and enter deadlines from the official scholarship announcement."
+);
+
+const trackerScholarship = makeSelect("trackerScholarship", [
+    { value: "", label: "Choose a scholarship" },
+    ...scholarships.map(item => ({
+        value: item.id,
+        label: item.name
+    }))
+]);
+
+const trackerDeadline = makeInput("trackerDeadline", "date");
+
+const trackerStatus = makeSelect("trackerStatus", [
+    { value: "Interested", label: "Interested" },
+    { value: "Preparing documents", label: "Preparing documents" },
+    { value: "Ready to apply", label: "Ready to apply" },
+    { value: "Submitted", label: "Submitted" },
+    { value: "Decision received", label: "Decision received" }
+]);
+
+const trackerList = featureElement("div", "feature-list");
+trackerList.id = "trackerList";
+
+trackerCard.append(
+    makeFieldLabel("Scholarship", trackerScholarship),
+    makeFieldLabel("Deadline (confirm it officially)", trackerDeadline),
+    makeFieldLabel("Application status", trackerStatus),
+    makeFeatureButton("Add / Update Application", saveApplication),
+    trackerList
+);
+
+function saveApplication() {
+    if (!trackerScholarship.value) {
+        trackerList.replaceChildren(featureElement(
+            "p",
+            "feature-empty",
+            "Choose a scholarship first."
+        ));
+        return;
+    }
+
+    const data = getFeatureData();
+
+    data.applications[trackerScholarship.value] = {
+        deadline: trackerDeadline.value,
+        status: trackerStatus.value
+    };
+
+    if (!saveFeatureData(data)) {
+        window.alert("Could not save your tracker. Check browser storage.");
+        return;
+    }
+
+    renderApplicationTracker();
+}
+
+function renderApplicationTracker() {
+    trackerList.replaceChildren();
+    const data = getFeatureData();
+
+    const entries = Object.entries(data.applications);
+
+    if (!entries.length) {
+        trackerList.appendChild(featureElement(
+            "p",
+            "feature-empty",
+            "No applications tracked yet."
+        ));
+        return;
+    }
+
+    entries.forEach(([id, application]) => {
+        const scholarship = scholarships.find(item => item.id === id);
+        if (!scholarship) return;
+
+        const entry = featureElement("div", "feature-list-item");
+        entry.append(
+            featureElement("strong", "", scholarship.name),
+            featureElement("p", "", `Status: ${application.status}`),
+            featureElement(
+                "p",
+                "",
+                application.deadline
+                    ? `Your saved deadline: ${application.deadline}`
+                    : "No deadline entered yet."
+            )
+        );
+
+        if (application.deadline) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const deadlineDate = new Date(
+                `${application.deadline}T00:00:00`
+            );
+
+            if (!Number.isNaN(deadlineDate.getTime())) {
+                const days = Math.ceil(
+                    (deadlineDate - today) / 86400000
+                );
+
+                const reminder = days < 0
+                    ? "Your saved deadline has passed. Check the official page."
+                    : days === 0
+                        ? "Your saved deadline is today."
+                        : `${days} day${days === 1 ? "" : "s"} until your saved deadline.`;
+
+                entry.appendChild(featureElement("p", "", reminder));
+            }
+        }
+
+        const removeButton = makeFeatureButton("Remove", () => {
+            const updated = getFeatureData();
+            delete updated.applications[id];
+            saveFeatureData(updated);
+            renderApplicationTracker();
+        });
+
+        entry.appendChild(removeButton);
+        trackerList.appendChild(entry);
+    });
+}
+
+/* University comparison */
+
+const compareCard = makeFeatureCard(
+    "🏛️ University Comparison",
+    "Select universities to compare their country, study focus, and official website."
+);
+
+const compareSelect = makeSelect("compareUniversity", [
+    { value: "", label: "Choose a university" },
+    ...universities.map((university, index) => ({
+        value: String(index),
+        label: university.name
+    }))
+]);
+
+const compareList = featureElement("div", "feature-list");
+compareList.id = "compareList";
+
+compareCard.append(
+    makeFieldLabel("University", compareSelect),
+    makeFeatureButton("Add to Comparison", addUniversityComparison),
+    makeFeatureButton("Clear Comparison", clearUniversityComparison),
+    compareList
+);
+
+function addUniversityComparison() {
+    if (compareSelect.value === "") return;
+
+    const data = getFeatureData();
+    const index = Number(compareSelect.value);
+
+    if (!Number.isInteger(index) || !universities[index]) return;
+
+    const name = universities[index].name;
+
+    if (!data.comparedUniversities.includes(name)) {
+        data.comparedUniversities.push(name);
+    }
+
+    data.comparedUniversities = data.comparedUniversities.slice(0, 4);
+    saveFeatureData(data);
+    renderUniversityComparison();
+}
+
+function clearUniversityComparison() {
+    const data = getFeatureData();
+    data.comparedUniversities = [];
+    saveFeatureData(data);
+    renderUniversityComparison();
+}
+
+function renderUniversityComparison() {
+    compareList.replaceChildren();
+
+    const data = getFeatureData();
+
+    if (!data.comparedUniversities.length) {
+        compareList.appendChild(featureElement(
+            "p",
+            "feature-empty",
+            "Add up to four universities to compare them."
+        ));
+        return;
+    }
+
+    data.comparedUniversities.forEach(name => {
+        const university = universities.find(item => item.name === name);
+        if (!university) return;
+
+        const entry = featureElement("div", "feature-list-item");
+        entry.append(
+            featureElement("strong", "", university.name),
+            featureElement("p", "", `Country: ${university.country}`),
+            featureElement("p", "", `Focus: ${university.focus}`)
+        );
+
+        const link = document.createElement("a");
+        link.href = university.url;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Official website ↗";
+        entry.appendChild(link);
+        compareList.appendChild(entry);
+    });
+}
+
+/* SOP planning helper */
+
+const sopCard = makeFeatureCard(
+    "✍️ Statement of Purpose Helper",
+    "Create a starting outline using your own details. Review and personalise it before using it in an application."
+);
+
+const sopCourse = makeInput(
+    "sopCourse",
+    "text",
+    "e.g. MSc Electrical Engineering"
+);
+
+const sopInterest = makeInput(
+    "sopInterest",
+    "text",
+    "e.g. embedded systems and automation"
+);
+
+const sopGoal = makeInput(
+    "sopGoal",
+    "text",
+    "e.g. develop accessible technology"
+);
+
+const sopExperience = makeTextArea(
+    "sopExperience",
+    "Describe your studies, projects, skills, and relevant experiences."
+);
+
+const sopOutput = makeTextArea(
+    "sopOutput",
+    "Your personalised outline will appear here."
+);
+sopOutput.readOnly = true;
+
+sopCard.append(
+    makeFieldLabel("Course or programme", sopCourse),
+    makeFieldLabel("Academic interests", sopInterest),
+    makeFieldLabel("Career goal", sopGoal),
+    makeFieldLabel("Your experience and projects", sopExperience),
+    makeFeatureButton("Create SOP Outline", createSopOutline),
+    makeFieldLabel("Editable draft outline", sopOutput),
+    makeFeatureButton("Copy Outline", copySopOutline)
+);
+
+function createSopOutline() {
+    const course = sopCourse.value.trim();
+    const interest = sopInterest.value.trim();
+    const goal = sopGoal.value.trim();
+    const experience = sopExperience.value.trim();
+
+    if (!course || !interest || !goal || !experience) {
+        sopOutput.value =
+            "Please fill in all four fields before creating your outline.";
+        return;
+    }
+
+    sopOutput.value =
+`STATEMENT OF PURPOSE — DRAFT OUTLINE
+
+1. Introduction
+Explain why you want to study ${course}.
+
+2. Academic interests
+Describe your interest in ${interest} and what you hope to learn.
+
+3. Relevant experience
+Use your own examples:
+${experience}
+
+4. Future goals
+Explain how this programme may help you work toward ${goal}.
+
+5. Why this programme
+Add specific modules, research opportunities, or facilities from the official university website.
+
+6. Conclusion
+Summarise your motivation and readiness for the programme.
+
+IMPORTANT:
+This is a planning outline, not a finished personal statement. Check the word limit and instructions, use only truthful personal experiences, and edit it into your own voice.`;
+}
+
+async function copySopOutline() {
+    if (!sopOutput.value.trim()) return;
+
+    try {
+        await navigator.clipboard.writeText(sopOutput.value);
+        window.alert("Outline copied.");
+    } catch {
+        sopOutput.focus();
+        sopOutput.select();
+        window.alert("If copying did not work automatically, copy the selected text manually.");
+    }
+}
+
+/* Scholarship safety and verification reminder */
+
+const safetyCard = makeFeatureCard(
+    "🛡️ Scholarship Safety Check",
+    "Use this checklist before sharing documents, paying fees, or submitting an application."
+);
+
+const safetyList = featureElement("div", "feature-list");
+
+[
+    "Open the provider's official website independently.",
+    "Check the latest deadline and eligibility rules.",
+    "Confirm the scholarship on the official government or university website.",
+    "Be cautious of guaranteed awards, pressure tactics, and requests for unusual payments.",
+    "Never share passwords or verification codes with scholarship agents.",
+    "Verify any application fee directly with the official provider."
+].forEach(message => {
+    const item = featureElement("div", "feature-list-item");
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.style.marginRight = "10px";
+
+    label.append(checkbox, document.createTextNode(message));
+    item.appendChild(label);
+    safetyList.appendChild(item);
+});
+
+safetyCard.append(
+    safetyList,
+    featureElement(
+        "p",
+        "feature-warning",
+        "This checklist is educational guidance, not a guarantee that an offer is genuine. Confirm details with the official provider."
+    )
+);
+
+/* Add all new cards to the existing protected content. */
+
+featureGrid.append(
+    profileCard,
+    savedCard,
+    trackerCard,
+    compareCard,
+    sopCard,
+    safetyCard
+);
+
+if (protectedContent) {
+    protectedContent.appendChild(featureHub);
+}
+
+/* Keep saved items in sync with the existing scholarship directory. */
+
+const originalRenderScholarships = renderScholarships;
+
+renderScholarships = function () {
+    originalRenderScholarships();
+    renderSavedScholarships();
+};
+
+/* Render feature data on initial load. */
+
+renderMatches();
+renderSavedScholarships();
+renderApplicationTracker();
+renderUniversityComparison();
+
+/* Ensure protected content is not revealed by Explore while logged out. */
+
+function guardExploreButton(event) {
+    if (auth.currentUser) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    const authTarget = document.getElementById("auth-section");
+    authTarget?.scrollIntoView({ behavior: "smooth" });
+
+    const message = document.getElementById("auth-message");
+    if (message) {
+        message.textContent = "Please sign up or log in to open your student workspace.";
+        message.className = "";
+    }
+}
+
+document.getElementById("exploreButton")
+    ?.addEventListener("click", guardExploreButton, true);
+
+document.getElementById("heroExploreButton")
+    ?.addEventListener("click", guardExploreButton, true);
+
+/* Add a dashboard link for convenient navigation. */
+
+const dashboardLink = document.createElement("a");
+dashboardLink.href = "#student-tools";
+dashboardLink.textContent = "Student Dashboard";
+dashboardLink.addEventListener("click", event => {
+    event.preventDefault();
+
+    if (!auth.currentUser) {
+        document.getElementById("auth-section")
+            ?.scrollIntoView({ behavior: "smooth" });
+        return;
+    }
+
+    exploreMode = true;
+    protectedContent.hidden = false;
+    document.getElementById("dashboard").hidden = false;
+
+    document.getElementById("student-tools")
+        ?.scrollIntoView({ behavior: "smooth" });
+});
+
+const mainNav = document.querySelector(".navbar nav");
+
+if (mainNav && !mainNav.querySelector('[href="#student-tools"]')) {
+    mainNav.appendChild(dashboardLink);
+}

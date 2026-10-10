@@ -469,6 +469,137 @@
             Always confirm scholarship information with the official provider.
         </p>
 
+        <section class="dashboard" id="dashboard" hidden>
+            <div class="dashboard-header">
+                <div>
+                    <p class="eyebrow">YOUR STUDENT SPACE</p>
+                    <h1>My Scholarship Dashboard 🎓</h1>
+                    <p>Keep every application and deadline in one place.</p>
+                </div>
+                <button class="refresh-btn" id="refreshDashboardButton" type="button">
+                    ↻ Refresh
+                </button>
+            </div>
+
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <span>💜</span>
+                    <p>Saved Scholarships</p>
+                    <h2 id="savedCount">0</h2>
+                </div>
+                <div class="stat-card">
+                    <span>📝</span>
+                    <p>In Progress</p>
+                    <h2 id="progressCount">0</h2>
+                </div>
+                <div class="stat-card">
+                    <span>⏰</span>
+                    <p>Upcoming Deadlines</p>
+                    <h2 id="deadlineCount">0</h2>
+                </div>
+                <div class="stat-card">
+                    <span>✅</span>
+                    <p>Submitted</p>
+                    <h2 id="submittedCount">0</h2>
+                </div>
+            </div>
+
+            <div class="dashboard-add-scholarship">
+                <h2>Find or add a scholarship</h2>
+                <label for="dashboardScholarshipSearch">
+                    Search the scholarship directory
+                </label>
+                <input
+                    id="dashboardScholarshipSearch"
+                    type="search"
+                    placeholder="Search by scholarship name, country, or subject"
+                    autocomplete="off"
+                >
+                <div
+                    id="dashboardSearchResults"
+                    class="feature-list dashboard-search-results"
+                    aria-live="polite"
+                ></div>
+
+                <details class="custom-scholarship-form">
+                    <summary>Add a scholarship not listed above</summary>
+                    <form id="customScholarshipForm">
+                        <label for="customScholarshipName">Scholarship name</label>
+                        <input
+                            id="customScholarshipName"
+                            name="name"
+                            type="text"
+                            required
+                            maxlength="160"
+                        >
+
+                        <label for="customScholarshipDeadline">
+                            Official deadline or date
+                        </label>
+                        <input
+                            id="customScholarshipDeadline"
+                            name="deadline"
+                            type="text"
+                            placeholder="For example: 15 December 2026 or check provider"
+                            maxlength="160"
+                        >
+
+                        <label for="customScholarshipUrl">Official website (HTTPS)</label>
+                        <input
+                            id="customScholarshipUrl"
+                            name="url"
+                            type="url"
+                            placeholder="https://"
+                        >
+
+                        <button class="detail-action" type="submit">
+                            Add to My Scholarships
+                        </button>
+                        <p id="customScholarshipStatus" aria-live="polite"></p>
+                    </form>
+                </details>
+            </div>
+
+            <div class="dashboard-layout">
+                <div class="scholarship-panel">
+                    <div class="panel-heading">
+                        <div>
+                            <h2>My Scholarships</h2>
+                            <p>Track your applications</p>
+                        </div>
+                        <select id="statusFilter">
+                            <option value="All">All statuses</option>
+                            <option value="Interested">Interested</option>
+                            <option value="Applying">Applying</option>
+                            <option value="Submitted">Submitted</option>
+                            <option value="Accepted">Accepted</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <div id="dashboardScholarships"></div>
+                </div>
+
+                <aside class="selected-panel">
+                    <h2>Scholarship Details</h2>
+                    <p class="muted">Select a scholarship to view its dates.</p>
+
+                    <div id="selectedScholarship">
+                        <div class="empty-state">
+                            <span>📅</span>
+                            <p>Select a scholarship from your list.</p>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <p class="dashboard-note">
+                💡 Always confirm opening dates and deadlines on the official
+                scholarship website. Dates that are not verified are marked
+                “To be announced”.
+            </p>
+        </section>
+
         <div class="footer-author">
             <p class="footer-author-label">Published &amp; Developed by</p>
             <h2 class="footer-author-name">
