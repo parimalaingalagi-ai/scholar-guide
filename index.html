@@ -1,0 +1,487 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Scholar Guide helps students discover scholarships, explore universities, and prepare applications.">
+    <title>Scholar Guide | Find Your Future</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="navbar">
+        <a href="#home" class="logo">Scholar <span>Guide</span></a>
+
+        <nav aria-label="Main navigation">
+            <a href="#home">Home</a>
+            <a href="#universities">Universities</a>
+            <a href="#scholarships">Scholarships</a>
+            <a href="#preparation">Preparation</a>
+            <a href="#auth-section" id="accountNavLink">Sign Up / Login</a>
+        </nav>
+
+        <a href="#scholarships" class="nav-button" id="exploreButton">
+            Explore Now
+        </a>
+    </header>
+
+    <main>
+
+        <!-- HOME: PUBLIC ACCESS -->
+        <section class="hero" id="home">
+            <div class="hero-content">
+                <p class="eyebrow">YOUR FUTURE STARTS HERE</p>
+
+                <h1>
+                    Find the right scholarship.<br>
+                    <span>Make your dream happen.</span>
+                </h1>
+
+                <p class="hero-description">
+                    Discover international and domestic scholarship opportunities,
+                    explore universities, compare funding, and organize your applications
+                    in one place.
+                </p>
+
+                <a href="#scholarships" class="primary-button">
+                    Explore Scholarships →
+                </a>
+
+                <div class="hero-stats">
+                    <div>
+                        <strong id="totalCount">0</strong>
+                        <span>Scholarship resources</span>
+                    </div>
+
+                    <div>
+                        <strong>3</strong>
+                        <span>Simple steps: Find, Check, Prepare</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hero-card">
+                <div class="hero-icon">🎓</div>
+                <p class="card-label">YOUR NEXT CHAPTER</p>
+                <h2>Dream big.<br>Prepare smart.</h2>
+
+                <ul>
+                    <li>✓ Discover opportunities worldwide</li>
+                    <li>✓ Compare funding and eligibility</li>
+                    <li>✓ Track your preparation</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- BENEFITS: PUBLIC ACCESS -->
+        <section class="benefits" aria-label="Scholar Guide benefits">
+            <div>
+                <span>🌍</span>
+                <h3>Global Opportunities</h3>
+                <p>Explore scholarship providers across countries.</p>
+            </div>
+
+            <div>
+                <span>💰</span>
+                <h3>Understand Funding</h3>
+                <p>Check tuition, living support, and other benefits.</p>
+            </div>
+
+            <div>
+                <span>📋</span>
+                <h3>Stay Prepared</h3>
+                <p>Organize documents and application tasks.</p>
+            </div>
+        </section>
+
+        <!-- SIGN UP / LOGIN -->
+        <section id="auth-section" class="auth-section">
+            <div class="auth-layout">
+                <div class="auth-brand-panel">
+                    <a class="auth-brand" href="#home">
+                        <span class="auth-brand-icon">✦</span>
+                        <span>
+                            <strong>Scholar Guide</strong>
+                            <small>Your Dreams ✦ Our Guidance</small>
+                        </span>
+                    </a>
+
+                    <div class="auth-brand-content">
+                        <p class="auth-kicker">YOUR FUTURE STARTS HERE</p>
+                        <h2>Big Dreams.<br><span>Better Guidance.</span></h2>
+
+                        <p class="auth-brand-description">
+                            Discover global scholarships, explore top universities,
+                            and find the guidance you need to shape your future.
+                        </p>
+
+                        <div class="auth-benefits">
+                            <div class="auth-benefit">
+                                <span>✧</span>
+                                <p>Explore scholarships worldwide</p>
+                            </div>
+                            <div class="auth-benefit">
+                                <span>⌂</span>
+                                <p>Discover universities that fit your goals</p>
+                            </div>
+                            <div class="auth-benefit">
+                                <span>✎</span>
+                                <p>Organise your application preparation</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="auth-brand-footer">Your next chapter begins here. ♡</p>
+                </div>
+
+                <div class="auth-form-panel">
+                    <div class="auth-top-link">
+                        <span id="auth-top-text">New to Scholar Guide?</span>
+                        <button type="button" id="auth-switch-button" class="auth-top-button">
+                            Sign Up →
+                        </button>
+                    </div>
+
+                    <div class="auth-form-content">
+                        <div class="auth-heading-icon">✧</div>
+                        <h2 id="auth-title">Welcome to Scholar Guide</h2>
+
+                        <p id="auth-description">
+                            Sign up to explore scholarships and universities.
+                        </p>
+
+                        <form id="auth-form">
+                            <label for="auth-email">Email address</label>
+                            <input
+                                type="email"
+                                id="auth-email"
+                                placeholder="Enter your email"
+                                autocomplete="email"
+                                required
+                            >
+
+                            <label for="auth-password">Password</label>
+                            <input
+                                type="password"
+                                id="auth-password"
+                                placeholder="Enter your password"
+                                autocomplete="new-password"
+                                minlength="6"
+                                required
+                            >
+
+                            <button type="submit" id="auth-submit">
+                                Create Account →
+                            </button>
+                        </form>
+
+                        <p id="auth-message" role="status" aria-live="polite"></p>
+
+                        <div class="auth-switch">
+                            <span id="auth-switch-text">Already have an account?</span>
+                            <button
+                                type="button"
+                                id="auth-switch-inline"
+                                class="auth-inline-button"
+                            >
+                                Login
+                            </button>
+                        </div>
+
+                        <p class="auth-privacy">♙ Your account is managed securely by Firebase.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="account-section" class="account-section" hidden>
+            <div class="account-card">
+                <div class="account-avatar">✧</div>
+                <p class="auth-kicker">YOUR SCHOLAR GUIDE ACCOUNT</p>
+                <h2>Welcome, Scholar!</h2>
+                <p class="account-description">
+                    You are signed in and ready to explore your opportunities.
+                </p>
+
+                <div class="account-email-box">
+                    <span class="account-email-label">SIGNED IN AS</span>
+                    <p id="signed-in-email"></p>
+                </div>
+
+                <button type="button" id="auth-logout" class="account-logout">
+                    Log Out
+                </button>
+            </div>
+        </section>
+
+        <!-- PROTECTED UNIVERSITY AND SCHOLARSHIP CONTENT -->
+        <div id="protected-content" hidden>
+
+            <!-- UNIVERSITY DIRECTORY -->
+            <section class="university-showcase" id="universities">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">EXPLORE YOUR OPTIONS</p>
+                        <h2>Find a university</h2>
+                        <p>
+                            Search institutions and explore official course
+                            and funding information.
+                        </p>
+                    </div>
+                </div>
+
+                <label class="university-search-label" for="universitySearch">
+                    Search universities
+
+                    <input
+                        id="universitySearch"
+                        type="search"
+                        placeholder="Try TUM, Tokyo, engineering, Germany…"
+                    >
+                </label>
+
+                <div class="university-filters">
+                    <label for="universityCountryFilter">
+                        Country
+
+                        <select id="universityCountryFilter">
+                            <option value="">All countries</option>
+                        </select>
+                    </label>
+                </div>
+
+                <div
+                    id="universityGrid"
+                    class="university-grid"
+                    aria-live="polite"
+                ></div>
+
+                <p
+                    id="universityResultCount"
+                    class="university-result-count"
+                    aria-live="polite"
+                ></p>
+
+                <p class="data-notice">
+                    University listings are starting points for research,
+                    not a guarantee of admission or scholarship eligibility.
+                    Course availability, fees, and funding must be verified
+                    with each official institution and scholarship provider.
+                </p>
+            </section>
+
+            <!-- SCHOLARSHIP DIRECTORY -->
+            <section class="scholarship-section" id="scholarships">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">EXPLORE OPPORTUNITIES</p>
+                        <h2>Global scholarship search</h2>
+                        <p>
+                            Search by name, country, subject, provider,
+                            or funding keyword.
+                        </p>
+                    </div>
+
+                    <span
+                        id="resultCount"
+                        class="result-count"
+                        aria-live="polite"
+                    ></span>
+                </div>
+
+                <div class="filters">
+                    <label class="search-label" for="searchInput">
+                        Search scholarships
+
+                        <input
+                            id="searchInput"
+                            type="search"
+                            placeholder="e.g. embedded systems, DAAD, Japan..."
+                        >
+                    </label>
+
+                    <label for="countryFilter">
+                        Destination
+
+                        <select id="countryFilter">
+                            <option value="">All countries</option>
+                        </select>
+                    </label>
+
+                    <label for="degreeFilter">
+                        Study level
+
+                        <select id="degreeFilter">
+                            <option value="">All study levels</option>
+                            <option value="Bachelor's">Bachelor's</option>
+                            <option value="Master's">Master's</option>
+                            <option value="PhD">PhD</option>
+                            <option value="Exchange">Exchange</option>
+                            <option value="Multiple levels">Multiple levels</option>
+                        </select>
+                    </label>
+
+                    <label for="subjectFilter">
+                        Subject area
+
+                        <select id="subjectFilter">
+                            <option value="">All subjects</option>
+                            <option value="Engineering">Engineering</option>
+                            <option value="Science and technology">
+                                Science and technology
+                            </option>
+                            <option value="Any eligible subject">
+                                Any eligible subject
+                            </option>
+                            <option value="Research">Research</option>
+                            <option value="Varies by programme">
+                                Varies by programme
+                            </option>
+                        </select>
+                    </label>
+
+                    <label for="fundingFilter">
+                        Funding
+
+                        <select id="fundingFilter">
+                            <option value="">All funding types</option>
+                            <option value="Fully funded">Fully funded</option>
+                            <option value="Partially funded">Partially funded</option>
+                            <option value="Tuition support">Tuition support</option>
+                            <option value="Varies by award">Varies by award</option>
+                        </select>
+                    </label>
+
+                    <button
+                        id="resetFilters"
+                        class="reset-button"
+                        type="button"
+                    >
+                        Reset filters
+                    </button>
+                </div>
+
+                <div class="search-help">
+                    <strong>Tip:</strong> Try a scholarship name (MEXT),
+                    destination (Germany), degree (Master's), or subject
+                    (engineering).
+                </div>
+
+                <div
+                    id="scholarshipGrid"
+                    class="scholarship-grid"
+                    aria-live="polite"
+                ></div>
+
+                <p class="data-notice">
+                    <strong>Important:</strong> Scholar Guide is a discovery
+                    directory, not an official scholarship provider. Funding,
+                    eligibility, deadlines, and application routes can change.
+                    Always confirm details with the official provider.
+                    A listed university is not a guarantee of admission or funding.
+                </p>
+            </section>
+
+            <!-- PREPARATION NOTEBOOK -->
+            <section class="preparation-section" id="preparation">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">YOUR PERSONAL WORKSPACE</p>
+                        <h2>My preparation notebook</h2>
+                        <p>
+                            Track the documents you need for scholarship applications.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="notebook-layout">
+                    <div class="checklist-card">
+                        <h3>Application checklist</h3>
+                        <p>Tick each item when you have prepared it.</p>
+
+                        <div id="checklist"></div>
+
+                        <div class="progress-track">
+                            <div id="progressBar"></div>
+                        </div>
+
+                        <p id="progressText">0% completed</p>
+                    </div>
+
+                    <div class="notes-card">
+                        <h3>My scholarship notes</h3>
+                        <p>Record your goals, questions, and next steps.</p>
+
+                        <textarea
+                            id="notesInput"
+                            placeholder="Example: Research master's scholarships in Germany for embedded systems..."
+                            aria-label="My scholarship notes"
+                        ></textarea>
+
+                        <button
+                            id="saveNotes"
+                            class="primary-button"
+                            type="button"
+                        >
+                            Save Notes
+                        </button>
+
+                        <p id="notesStatus" aria-live="polite"></p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- SCHOLARSHIP DETAILS POPUP -->
+        <section
+            id="scholarshipDetails"
+            class="details-overlay"
+            hidden
+            aria-labelledby="detailsTitle"
+            aria-modal="true"
+            role="dialog"
+        >
+            <div class="details-dialog">
+                <button
+                    type="button"
+                    class="details-close"
+                    id="closeDetails"
+                    aria-label="Close scholarship details"
+                >×</button>
+
+                <div id="detailsContent"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="site-footer">
+        <h2 class="footer-brand">Scholar Guide</h2>
+
+        <p class="footer-description">
+            Helping students discover opportunities and prepare for their future.
+        </p>
+
+        <p class="footer-disclaimer">
+            Always confirm scholarship information with the official provider.
+        </p>
+
+        <div class="footer-author">
+            <p class="footer-author-label">Published &amp; Developed by</p>
+            <h2 class="footer-author-name">
+                Parimala Mahalingappa Ingalagi
+            </h2>
+        </div>
+
+        <p class="footer-copyright">
+            © 2026 Scholar Guide. All rights reserved.
+        </p>
+    </footer>
+
+    <!-- Load script.js as a module for Firebase -->
+    <script type="module" src="script.js"></script>
+
+</body>
+</html>

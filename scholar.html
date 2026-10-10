@@ -1,0 +1,95 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Scholarships | ScholarPath</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo" href="index.html">Scholar<span>Path</span></a>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="scholarships.html">Scholarships</a>
+            <a href="index.html#universities">Universities</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <p class="eyebrow">EXPLORE OPPORTUNITIES</p>
+            <h1>Find your <span>scholarship path.</span></h1>
+            <p class="hero-description">
+                Search scholarships and open any card to view its
+                universities, documents, exams and application requirements.
+            </p>
+
+            <form id="searchForm" class="search-bar">
+                <span aria-hidden="true">⌕</span>
+                <input
+                    id="searchInput"
+                    type="search"
+                    placeholder="Search country, scholarship, course or exam..."
+                    aria-label="Search scholarships"
+                >
+                <button type="submit">Search</button>
+            </form>
+        </section>
+
+        <section class="filters-section" id="scholarships">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">YOUR OPTIONS</p>
+                    <h2>Scholarship catalogue</h2>
+                </div>
+                <button id="resetFilters" class="text-button" type="button">
+                    Reset filters
+                </button>
+            </div>
+
+            <div class="filters">
+                <label>
+                    Country
+                    <select id="countryFilter">
+                        <option value="">All countries</option>
+                    </select>
+                </label>
+
+                <label>
+                    Degree
+                    <select id="degreeFilter">
+                        <option value="">All degrees</option>
+                        <option value="Bachelor's">Bachelor's</option>
+                        <option value="Master's">Master's</option>
+                        <option value="PhD">PhD</option>
+                    </select>
+                </label>
+
+                <label>
+                    Funding
+                    <select id="fundingFilter">
+                        <option value="">All funding types</option>
+                        <option value="Fully funded">Fully funded</option>
+                        <option value="Partially funded">Partially funded</option>
+                        <option value="Tuition support">Tuition support</option>
+                    </select>
+                </label>
+            </div>
+
+            <p class="results-label">
+                Showing <strong id="resultCount">0</strong> opportunities
+            </p>
+
+            <div id="scholarshipGrid" class="scholarship-grid"></div>
+        </section>
+    </main>
+
+    <footer>
+        <a class="logo" href="index.html">Scholar<span>Path</span></a>
+        <p class="copyright">Created by Parimala Mahalingappa Ingalagi</p>
+    </footer>
+</body>
+</html>
